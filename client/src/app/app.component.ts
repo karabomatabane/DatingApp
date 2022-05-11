@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
+import { Title } from '@angular/platform-browser';
 import { User } from './_models/user';
 import { AccountService } from './_services/account.service';
 import { PresenceService } from './_services/presence.service';
@@ -10,13 +11,14 @@ import { PresenceService } from './_services/presence.service';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
-  title = 'The Dating app';
+  title = 'The Dating App';
   users: any;
 
-  constructor(private accountService: AccountService, private presence: PresenceService) {}
+  constructor(private accountService: AccountService, private presence: PresenceService, private titleService: Title) {}
 
   ngOnInit() {
     this.setCurrentUser();
+    this.titleService.setTitle(this.title);
   }
 
   setCurrentUser() {
