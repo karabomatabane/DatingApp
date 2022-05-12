@@ -7,7 +7,7 @@ namespace API.Helpers
 {
     public class PaginationHeader
     {
-        public PaginationHeader(int currentPage, int itemsPerPage, int totalItems, int totalPages)
+         public PaginationHeader(int currentPage, int itemsPerPage, int totalItems, int totalPages)
         {
             CurrentPage = currentPage;
             ItemsPerPage = itemsPerPage;

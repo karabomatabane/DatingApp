@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using API.Helpers;
 using API.Interfaces;
@@ -18,16 +15,18 @@ namespace API.Services
         {
             var acc = new Account
             (
-                config.Value.CloudName, 
-                config.Value.ApiKey, 
+                config.Value.CloudName,
+                config.Value.ApiKey,
                 config.Value.ApiSecret
             );
 
             _cloudinary = new Cloudinary(acc);
         }
+
         public async Task<ImageUploadResult> AddPhotoAsync(IFormFile file)
         {
             var uploadResult = new ImageUploadResult();
+
             if (file.Length > 0)
             {
                 using var stream = file.OpenReadStream();

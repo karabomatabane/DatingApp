@@ -1,12 +1,17 @@
-using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
-using API.DTOs;
+using API.Data;
 using API.Entities;
-using API.Interfaces;
-using AutoMapper;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using API.DTOs;
 using Microsoft.EntityFrameworkCore;
+using API.Interfaces;
+using System.Collections.Generic;
+using System.Linq;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using Microsoft.AspNetCore.Identity;
 
 namespace API.Controllers
 {
@@ -16,7 +21,7 @@ namespace API.Controllers
         private readonly IMapper _mapper;
         private readonly SignInManager<AppUser> _signInManager;
         private readonly UserManager<AppUser> _userManager;
-        public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, ITokenService tokenService, IMapper mapper)
+        public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager , ITokenService tokenService, IMapper mapper)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -27,19 +32,19 @@ namespace API.Controllers
         [HttpPost("register")]
         public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
         {
-            if (await UserExists(registerDto.Username)) return BadRequest("Username is taken");
+            if(await UserExists(registerDto.Username))
+                return BadRequest("Username is taken");
 
             var user = _mapper.Map<AppUser>(registerDto);
 
             user.UserName = registerDto.Username.ToLower();
+            var results = await _userManager.CreateAsync(user, registerDto.Password);
 
-            var result = await _userManager.CreateAsync(user, registerDto.Password);
+            if(!results.Succeeded) return BadRequest(results.Errors);
 
-            if (!result.Succeeded) return BadRequest(result.Errors);
+            var roleResults = await _userManager.AddToRoleAsync(user, "Member");
 
-            var roleResult = await _userManager.AddToRoleAsync(user, "Member");
-
-            if (!roleResult.Succeeded) return BadRequest(roleResult.Errors);
+            if(!roleResults.Succeeded) return BadRequest(results.Errors);
 
             return new UserDto
             {
@@ -50,36 +55,35 @@ namespace API.Controllers
             };
         }
 
-        [HttpPost("Login")]
+        [HttpPost("login")]
         public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
         {
             var user = await _userManager.Users
-            .Include(p => p.Photos)
-            .SingleOrDefaultAsync(user => user.UserName == loginDto.Username.ToLower());
+                .Include(p => p.Photos)
+                .SingleOrDefaultAsync(x => x.UserName == loginDto.Username.ToLower());
 
-            if (user == null)
-            {
-                return Unauthorized("Invalid username");
-            }
+            if (user == null) return Unauthorized("Invalid username");
 
-            var result = await _signInManager
-            .CheckPasswordSignInAsync(user, loginDto.Password, false);
+            var results = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
 
-            if (!result.Succeeded) return Unauthorized();
+            if(!results.Succeeded) return Unauthorized();
 
             return new UserDto
             {
                 Username = user.UserName,
                 Token = await _tokenService.CreateToken(user),
-                PhotoUrl = user.Photos.FirstOrDefault(photo => photo.IsMain)?.Url,
+                PhotoUrl = user.Photos.FirstOrDefault(x => x.IsMain)?.Url,
                 KnownAs = user.KnownAs,
                 Gender = user.Gender
             };
         }
 
-        private async Task<bool> UserExists(string username)
+        private async Task<bool> UserExists(string Username)
         {
-            return await _userManager.Users.AnyAsync(user => user.UserName == username.ToLower());
+            return await _userManager.Users.AnyAsync(x => x.UserName == Username.ToLower());
         }
+
     }
+
+    
 }

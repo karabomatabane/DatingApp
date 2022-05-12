@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace API.Extensions
 {
@@ -12,11 +8,9 @@ namespace API.Extensions
         {
             return user.FindFirst(ClaimTypes.Name)?.Value;
         }
-
-        public static int GetUserId(this ClaimsPrincipal user)
+         public static int GetUserId(this ClaimsPrincipal user)
         {
-            string x = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            return int.Parse(x);
+            return int.Parse(user.FindFirst(ClaimTypes.NameIdentifier)?.Value);
         }
     }
 }

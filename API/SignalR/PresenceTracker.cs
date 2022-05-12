@@ -20,7 +20,7 @@ namespace API.SignalR
                 }
                 else
                 {
-                    OnlineUsers.Add(username, new List<string> { connectionId });
+                    OnlineUsers.Add(username, new List<string>{connectionId});
                     isOnline = true;
                 }
             }
@@ -31,7 +31,7 @@ namespace API.SignalR
         public Task<bool> UserDisconnected(string username, string connectionId)
         {
             bool isOffline = false;
-            lock (OnlineUsers)
+            lock(OnlineUsers)
             {
                 if (!OnlineUsers.ContainsKey(username)) return Task.FromResult(isOffline);
 
@@ -49,7 +49,7 @@ namespace API.SignalR
         public Task<string[]> GetOnlineUsers()
         {
             string[] onlineUsers;
-            lock (OnlineUsers)
+            lock(OnlineUsers)
             {
                 onlineUsers = OnlineUsers.OrderBy(k => k.Key).Select(k => k.Key).ToArray();
             }
@@ -60,12 +60,15 @@ namespace API.SignalR
         public Task<List<string>> GetConnectionsForUser(string username)
         {
             List<string> connectionIds;
-            lock (OnlineUsers)
+            lock(OnlineUsers)
             {
                 connectionIds = OnlineUsers.GetValueOrDefault(username);
             }
 
             return Task.FromResult(connectionIds);
         }
+
+
     }
 }
+

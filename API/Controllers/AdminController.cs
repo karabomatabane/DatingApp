@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Entities;
@@ -10,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
-    public class AdminController :BaseApiController
+    public class AdminController: BaseApiController
     {
         private readonly UserManager<AppUser> _userManager;
         public AdminController(UserManager<AppUser> userManager)
@@ -18,20 +16,20 @@ namespace API.Controllers
             _userManager = userManager;
             
         }
-        
+
         [Authorize(Policy = "RequireAdminRole")]
         [HttpGet("users-with-roles")]
         public async Task<ActionResult> GetUsersWithRoles()
         {
             var users = await _userManager.Users
-                .Include(r => r.UserRoles)
+                .Include(r => r.UserRole)
                 .ThenInclude(r => r.Role)
                 .OrderBy(u => u.UserName)
                 .Select(u => new
                 {
                     u.Id,
                     Username = u.UserName,
-                    Roles = u.UserRoles.Select(r => r.Role.Name).ToList()
+                    Roles = u.UserRole.Select(r => r.Role.Name).ToList()
                 })
                 .ToListAsync();
 
@@ -59,6 +57,7 @@ namespace API.Controllers
 
             return Ok(await _userManager.GetRolesAsync(user));
         }
+
 
         [Authorize(Policy = "ModeratePhotoRole")]
         [HttpGet("photos-to-moderate")]

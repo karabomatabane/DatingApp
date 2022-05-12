@@ -1,10 +1,8 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using API.DTOs;
 using API.Entities;
 using API.Helpers;
+using API.DTOs;
 
 namespace API.Interfaces
 {
@@ -12,7 +10,7 @@ namespace API.Interfaces
     {
         void AddGroup(Group group);
         void RemoveConnection(Connection connection);
-        Task<Connection> GetConnection(String connectionId);
+        Task<Connection> GetConnection(string connectionId);
         Task<Group> GetMessageGroup(string groupName);
         Task<Group> GetGroupForConnection(string connectionId);
         void AddMessage(Message message);
@@ -22,3 +20,4 @@ namespace API.Interfaces
         Task<IEnumerable<MessageDto>> GetMessageThread(string currentUsername, string recipientUsername);
     }
 }
+

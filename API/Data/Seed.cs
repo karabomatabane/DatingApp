@@ -8,7 +8,8 @@ using Microsoft.EntityFrameworkCore;
 namespace API.Data
 {
     public class Seed
-    { public static async Task SeedUsers(UserManager<AppUser> userManager, RoleManager<AppRole> roleManager)
+    {
+        public static async Task SeedUsers(UserManager<AppUser> userManager, RoleManager<AppRole> roleManager)
         {
             if (await userManager.Users.AnyAsync()) return;
 
@@ -18,12 +19,12 @@ namespace API.Data
 
             var roles = new List<AppRole>
             {
-                new AppRole {Name = "Member"},
-                new AppRole {Name = "Admin"},
-                new AppRole {Name = "Moderator"}
+                new AppRole{Name = "Member"},
+                 new AppRole{Name = "Admin"},
+                  new AppRole{Name = "Moderator"},
             };
 
-            foreach (var role in roles)
+            foreach(var role in roles)
             {
                 await roleManager.CreateAsync(role);
             }
@@ -45,3 +46,4 @@ namespace API.Data
         }
     }
 }
+

@@ -1,13 +1,12 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
 using API.Entities;
 using API.Extensions;
-using API.Helpers;
 using API.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using API.Helpers;
 
 namespace API.Data
 {
@@ -26,18 +25,18 @@ namespace API.Data
 
         public async Task<PagedList<LikeDto>> GetUserLikes(LikesParams likesParams)
         {
-            var users = _context.Users.OrderBy(user => user.UserName).AsQueryable();
+            var users = _context.Users.OrderBy(u => u.UserName).AsQueryable();
             var likes = _context.Likes.AsQueryable();
 
             if (likesParams.Predicate == "liked")
             {
-                likes = likes.Where(like => like.SourceUserId == likesParams.UserID);
+                likes = likes.Where(like => like.SourceUserId == likesParams.UserId);
                 users = likes.Select(like => like.LikedUser); // List of users like by the current user
             }
 
             if (likesParams.Predicate == "likedBy")
             {
-                likes = likes.Where(like => like.LikedUserId == likesParams.UserID);
+                likes = likes.Where(like => like.LikedUserId == likesParams.UserId);
                 users = likes.Select(like => like.SourceUser); // List of users who have liked the current user
             }
 
@@ -51,14 +50,15 @@ namespace API.Data
                 Id = user.Id
             });
 
-            return await PagedList<LikeDto>.CreateAsync(likedUsers, likesParams.PageNumber, likesParams.PageSize);
+            return await PagedList<LikeDto>.CreateAsync(likedUsers,likesParams.PageNumber,likesParams.PageSize);
         }
 
         public async Task<AppUser> GetUserWithLikes(int userId)
         {
             return await _context.Users
-                .Include(user => user.LikedUsers)
-                .FirstOrDefaultAsync(user => user.Id == userId);
+                .Include(x => x.LikedUsers)
+                .FirstOrDefaultAsync(x => x.Id == userId);
         }
     }
 }
+

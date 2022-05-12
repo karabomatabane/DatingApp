@@ -1,5 +1,3 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -8,8 +6,8 @@ using API.Data;
 using API.DTOs;
 using API.Entities;
 using API.Extensions;
-using API.Helpers;
 using API.Interfaces;
+using API.Helpers;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -18,56 +16,58 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
+    [Authorize]
     public class UsersController : BaseApiController
     {
-        private readonly DataContext _context;
         private readonly IMapper _mapper;
-        private readonly IPhotoService _photoService;
+        public IPhotoService _photoService { get; }
         private readonly IUnitOfWork _unitOfWork;
 
-        public UsersController(IMapper mapper, IPhotoService photoService, IUnitOfWork unitOfWork)
+        public UsersController(IUnitOfWork unitOfWork, IMapper mapper, IPhotoService photoService)
         {
             _unitOfWork = unitOfWork;
-            _mapper = mapper;
             _photoService = photoService;
+            _mapper = mapper;
         }
 
+        // api/users
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<MemberDto>>> GetUsers([FromQuery] UserParams userParams)
+        public async Task<ActionResult<IEnumerable<MemberDto>>> GetUsers([FromQuery]UserParams userParams)
         {
             var gender = await _unitOfWork.UserRepository.GetUserGender(User.GetUsername());
-
             userParams.CurrentUsername = User.GetUsername();
-            
-            if (string.IsNullOrEmpty(userParams.Gender)) {userParams.Gender = gender == "male" ? "female" : "male";}
+
+            if(string.IsNullOrEmpty(userParams.Gender)){
+                userParams.Gender = gender == "male" ? "female" : "male";
+            }
+
             var users = await _unitOfWork.UserRepository.GetMembersAsync(userParams);
 
-            Response.AddPaginationHeader(users.CurrentPage, users.PageSize, users.TotalCount, users.TotalPages);
+            Response.AddPaginationHeader(users.CurrentPage, users.PageSize,
+            users.TotalCount, users.TotalPages);
 
             return Ok(users);
         }
 
-        [Authorize(Roles = "Member")]
-        [HttpGet("{username}", Name = "GetUser")]
+        // api/users/3
+        [HttpGet("{username}", Name ="GetUser")]
         public async Task<ActionResult<MemberDto>> GetUser(string username)
         {
             return await _unitOfWork.UserRepository.GetMemberAsync(username);
         }
 
+        // api/users
         [HttpPut]
         public async Task<ActionResult> UpdateUser(MemberUpdateDto memberUpdateDto)
         {
-            var username = User.GetUsername();
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(username);
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
 
             _mapper.Map(memberUpdateDto, user);
 
             _unitOfWork.UserRepository.Update(user);
 
-            if (await _unitOfWork.Complete())
-            {
-                return NoContent();
-            }
+            if (await _unitOfWork.Complete()) return NoContent();
+
             return BadRequest("Failed to update user");
         }
 
@@ -78,10 +78,7 @@ namespace API.Controllers
 
             var result = await _photoService.AddPhotoAsync(file);
 
-            if (result.Error != null)
-            {
-                return BadRequest(result.Error.Message);
-            }
+            if (result.Error != null) return BadRequest(result.Error.Message);
 
             var photo = new Photo
             {
@@ -98,10 +95,12 @@ namespace API.Controllers
 
             if (await _unitOfWork.Complete())
             {
-                return CreatedAtRoute("GetUser", new { username = user.UserName }, _mapper.Map<PhotoDto>(photo));
+                //return _mapper.Map<PhotoDto>(photo);
+                return CreatedAtRoute("GetUser",new {username = user.UserName},_mapper.Map<PhotoDto>(photo));
             }
 
-            return BadRequest("Problem adding photo.");
+
+            return BadRequest("Problem adding photo");
         }
 
         [HttpPut("set-main-photo/{photoId}")]
@@ -145,5 +144,6 @@ namespace API.Controllers
 
             return BadRequest("Failed to delete the photo");
         }
+
     }
 }

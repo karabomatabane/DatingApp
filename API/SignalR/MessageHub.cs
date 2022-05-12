@@ -17,8 +17,8 @@ namespace API.SignalR
         private readonly PresenceTracker _tracker;
         private readonly IUnitOfWork _unitOfWork;
 
-        public MessageHub(IUnitOfWork unitOfWork, IMapper mapper, 
-            PresenceTracker tracker, IHubContext<PresenceHub> presenceHub)
+        public MessageHub(IUnitOfWork unitOfWork, IMapper mapper,
+         IHubContext<PresenceHub> presenceHub, PresenceTracker tracker)
         {
             _unitOfWork = unitOfWork;
             _tracker = tracker;
@@ -38,7 +38,7 @@ namespace API.SignalR
             var messages = await _unitOfWork.MessageRepository.
                 GetMessageThread(Context.User.GetUsername(), otherUser);
 
-            if (_unitOfWork.HasChanges()) await _unitOfWork.Complete();
+            if(_unitOfWork.HasChanges()) await _unitOfWork.Complete();
 
             await Clients.Caller.SendAsync("ReceiveMessageThread", messages);
 
@@ -53,7 +53,7 @@ namespace API.SignalR
 
         public async Task SendMessage(CreateMessageDto createMessageDto)
         {
-            var username = Context.User.GetUsername();
+              var username = Context.User.GetUsername();
 
             if (username == createMessageDto.RecipientUsername.ToLower())
                 throw new HubException("You cannot send messages to yourself");
@@ -61,7 +61,7 @@ namespace API.SignalR
             var sender = await _unitOfWork.UserRepository.GetUserByUsernameAsync(username);
             var recipient = await _unitOfWork.UserRepository.GetUserByUsernameAsync(createMessageDto.RecipientUsername);
 
-            if (recipient == null) throw new HubException("Not found user");
+            if (recipient == null)  throw new HubException("Not found user");
 
             var message = new Message
             {
@@ -76,17 +76,17 @@ namespace API.SignalR
 
             var group = await _unitOfWork.MessageRepository.GetMessageGroup(groupName);
 
-            if (group.Connections.Any(x => x.Username == recipient.UserName))
+            if(group.Connections.Any(x => x.Username == recipient.UserName))
             {
                 message.DateRead = DateTime.UtcNow;
             }
             else
-            {
+            {   
                 var connections = await _tracker.GetConnectionsForUser(recipient.UserName);
-                if (connections != null)
+                if(connections != null)
                 {
-                    await _presenceHub.Clients.Clients(connections).SendAsync("NewMessageReceived",
-                        new {username = sender.UserName, knownAs = sender.KnownAs});
+                    await _presenceHub.Clients.Clients(connections).SendAsync("NewMessageReceived", 
+                    new {username = sender.UserName, knownAs = sender.KnownAs});
                 }
             }
 
@@ -95,7 +95,8 @@ namespace API.SignalR
             if (await _unitOfWork.Complete())
             {
                 await Clients.Group(groupName).SendAsync("NewMessage", _mapper.Map<MessageDto>(message));
-            }
+            } 
+            
         }
 
         private async Task<Group> AddToGroup(string groupName)
@@ -111,9 +112,8 @@ namespace API.SignalR
 
             group.Connections.Add(connection);
 
-            if (await _unitOfWork.Complete()) return group;
-
-            throw new HubException("Failed to join group");
+            if(await _unitOfWork.Complete()) return group;
+            throw new HubException("Failed to join group.");
         }
 
         private async Task<Group> RemoveFromMessageGroup()
@@ -121,15 +121,18 @@ namespace API.SignalR
             var group = await _unitOfWork.MessageRepository.GetGroupForConnection(Context.ConnectionId);
             var connection = group.Connections.FirstOrDefault(x => x.ConnectionId == Context.ConnectionId);
             _unitOfWork.MessageRepository.RemoveConnection(connection);
-            if (await _unitOfWork.Complete()) return group;
-            
+            if(await _unitOfWork.Complete()) return group;
+
             throw new HubException("Failed to remove from group");
         }
+
+
 
         private string GetGroupName(string caller, string other)
         {
             var stringCompare = string.CompareOrdinal(caller, other) < 0;
-            return stringCompare ? $"{caller}-{other}" : $"{other}-{caller}";
+            return stringCompare ? $"{caller}-{other}" :  $"{other}-{caller}";
         }
     }
 }
+
