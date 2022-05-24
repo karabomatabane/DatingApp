@@ -5,9 +5,22 @@ img.img-thumbnail {
 }
 
 .nv-file-over {
-    border: dotted 3px red;
+    border: dotted 3px rgb(177, 18, 18);
 }
 
-input[type=file]{
+input[type=file] {
     color: transparent;
+}
+
+.not-approved {
+    opacity: 0.2;
+}
+
+.img-wrapper {
+    position: relative
+}
+
+.img-text {
+    position: absolute;
+    bottom: 50px;
 }
