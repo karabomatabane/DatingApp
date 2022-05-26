@@ -1,4 +1,5 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { Visitor } from '../_models/visitor';
 import { Injectable } from '@angular/core';
 import { map, of, pipe, take } from 'rxjs';
 import { environment } from 'src/environments/environment';
@@ -94,10 +95,21 @@ export class MembersService {
   addLike(username: string) {
     return this.http.post(this.baseUrl + 'likes/' + username, {});
   }
-  
+ 
   getLikes(predicate: string, pageNumber, pageSize) {
     let params = getPaginationHeaders(pageNumber, pageSize);
     params = params.append('predicate', predicate);
     return getPaginatedResult<Partial<Member[]>>(this.baseUrl + 'likes', params, this.http);
+  }
+
+  recordVisit(username: string) {
+    return this.http.post(this.baseUrl + 'visits/' + username, {});
+  }
+
+  getVisits(predicate: string, pageNumber, pageSize, filter: boolean) {
+    let params = getPaginationHeaders(pageNumber, pageSize);
+    params = params.append('predicate', predicate);
+    params = params.append('filter', filter);
+    return getPaginatedResult<Partial<Visitor[]>>(this.baseUrl + 'visits', params, this.http);
   }
 }

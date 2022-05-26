@@ -1,0 +1,37 @@
+<div class="text-center mt-3">
+    <h2>{{predicate === 'visitedBy' ? 'Members who visited me' : 'Members who I visited'}}</h2>
+</div>
+
+<div class="container mt-3">
+    <div class="row">
+        <div class="btn-group" name="predicate">
+            <button class="btn btn-primary" btnRadio="visitedBy" [(ngModel)]="predicate" (click)="loadVisits()">Members
+                who visited me</button>
+            <button class="btn btn-primary" btnRadio="visited" [(ngModel)]="predicate" (click)="loadVisits()">Members
+                who I visited</button>
+        </div>
+    </div>
+
+    <!-- Default switch -->
+    <form #form="ngForm" class="form-inline mb-3" (ngSubmit)="loadVisits()">
+        <div class="custom-control custom-switch mt-3">
+            <input [checked]="filter" (change)="onFilter(!filter)" type="checkbox" class="custom-control-input" id="customSwitches">
+            <label class="custom-control-label" for="customSwitches">Visited in the past month</label>
+        </div>
+
+        <button class="btn btn-primary ml-2 mt-3" type="submit">Apply Filter</button>
+    </form>
+
+    <div class="row mt-3">
+        <div class="col-2" *ngFor="let visitor of visitors">
+            <app-member-card [member]="visitor" [visitor]="visitor"></app-member-card>
+        </div>
+    </div>
+</div>
+
+<div class="d-flex justify-content-center" *ngIf="pagination">
+    <pagination [boundaryLinks]="true" [totalItems]="pagination.totalItems" [itemsPerPage]="pagination.itemsPerPage"
+        [(ngModel)]="pagination.currentPage" (pageChanged)="pageChanged($event)" previousText="&lsaquo;"
+        nextText="&rsaquo;" firstText="&laquo;" lastText="&raquo;">
+    </pagination>
+</div>

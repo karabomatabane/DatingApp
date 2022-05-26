@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
-    public class AdminController :BaseApiController
+    public class AdminController : BaseApiController
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly IUnitOfWork _unitOfWork;
@@ -20,9 +20,9 @@ namespace API.Controllers
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
-            
+
         }
-        
+
         [Authorize(Policy = "RequireAdminRole")]
         [HttpGet("users-with-roles")]
         public async Task<ActionResult> GetUsersWithRoles()
