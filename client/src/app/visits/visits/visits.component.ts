@@ -36,8 +36,8 @@ pagination: Pagination;
     this.loadVisits();
   }
 
-  onFilter(value: boolean){
-    this.filter = value;
-  }
+  // onFilter(value: boolean){
+  //   this.filter = value;
+  // }
 
 }

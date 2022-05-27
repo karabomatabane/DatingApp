@@ -40,9 +40,12 @@ namespace API.Data
             {
                 visits = visits.Where(visit => visit.SourceUserId == visitsParams.UserID);
                 users = visits.Select(visit => visit.VisitedUser);
-                foreach (var visit in visits)
+                if (visits.Count() > 0)
                 {
-                    lastVisit.Add(visit.VisitedUserId, visit.LastVisit);
+                    foreach (var visit in visits)
+                    {
+                        lastVisit.Add(visit.VisitedUserId, visit.LastVisit);
+                    }
                 }
             }
 

@@ -15,7 +15,7 @@
     <!-- Default switch -->
     <form #form="ngForm" class="form-inline mb-3" (ngSubmit)="loadVisits()">
         <div class="custom-control custom-switch mt-3">
-            <input [checked]="filter" (change)="onFilter(!filter)" type="checkbox" class="custom-control-input" id="customSwitches">
+            <input [checked]="filter" (change)="filter = !filter" type="checkbox" class="custom-control-input" id="customSwitches">
             <label class="custom-control-label" for="customSwitches">Visited in the past month</label>
         </div>
 
